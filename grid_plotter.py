@@ -8,11 +8,6 @@ import Image
 import ImageDraw
 import ImageFont
 
-"""
-todo:
-	- allow colors to be specified via RGB, RGBA, or "strings"
-"""
-
 g_gridThickLineInterval = 5   # Every "thickLineInterval" number of lines will be drawn darker.
 g_gridThickLineWidth = 3
 
@@ -24,7 +19,7 @@ class Bunch:
 	def __init__(self, **kwds):
 		self.__dict__.update(kwds)
 
-def processLayer(baseImg, imageDesc, layerValue):	
+def processLayer(baseImg, imageDesc, layerValue):
 	color = layerValue["color"]
 	if not isinstance(color, list):
 		print "Invalid color \"%s\". Color must be of the form [R,G,B,A]. Example: [255,0,0,255]. Skipping this layer." % str(color)
@@ -156,7 +151,7 @@ def drawGridCoordinates(draw, imageDesc):
 
 		offsetX = cellSizeInPixels[0]
 		offsetX += (cellSizeInPixels[0] - fontSize[0]) / 2
-		
+
 		posTopY = cellSizeInPixels[1] - fontSize[1] - padding
 		pos = (x * cellSizeInPixels[0] + offsetX, posTopY)
 		draw.text(pos, str(coordStr), font = font, fill = "black")
@@ -215,7 +210,7 @@ def createImageDesc(rootValue):
 def parseFile(inFileName):
 	inFile = None
 	rootValue = None
-	
+
 	try:
 		inFile = open(inFileName, "r")
 		rootValue = json.load(inFile)
