@@ -11,8 +11,10 @@ setup(
     author='Shyam Guthikonda',
 
     packages = ['grid_plot'],
-    # install_requires = ['...'],
-    entry_points="""
+    install_requires = [
+        'Pillow == 2.7.0',
+    ],
+    entry_points = """
     [console_scripts]
     grid-plot = grid_plot.command_line:main
     """
