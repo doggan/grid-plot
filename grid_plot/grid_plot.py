@@ -2,9 +2,9 @@ import math
 import json
 
 # PIL
-import Image
-import ImageDraw
-import ImageFont
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 g_gridThickLineInterval = 5   # Every "thickLineInterval" number of lines will be drawn darker.
 g_gridThickLineWidth = 3
