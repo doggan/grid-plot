@@ -204,30 +204,28 @@ def createImageDesc(rootValue):
         gridSizeInPixels = gridSizeInPixels,\
         imageSizeInPixels = imageSizeInPixels)
 
-def parseFile(inFileName):
+def parseFile(filePath):
     inFile = None
     rootValue = None
 
     try:
-        inFile = open(inFileName, "r")
+        inFile = open(filePath, "r")
         rootValue = json.load(inFile)
         inFile.close()
     except IOError:
-        print "Unable to open file [%s]." % inFileName
+        print "Unable to open file [%s]." % filePath
         return None
     except ValueError:
-        print "Unable to parse input file [%s]. Invalid JSON format." % inFileName
+        print "Unable to parse input file [%s]. Invalid JSON format." % filePath
         return None
 
     return rootValue
 
-def processFile(inFileName):
+def processFile(infilePath, outfilePath):
     # Process input file.
-    rootValue = parseFile(inFileName)
+    rootValue = parseFile(infilePath)
     if not rootValue:
         return
-
-    outFileName = rootValue["outFileName"]
 
     # Group all necessary params into single object for easy access.
     imageDesc = createImageDesc(rootValue)
@@ -262,6 +260,6 @@ def processFile(inFileName):
     drawGridCoordinates(draw, imageDesc)
 
     # Save image.
-    img.save(outFileName, "PNG")
+    img.save(outfilePath, "PNG")
 
-    print "Successfully created image [%s]." % outFileName
+    print "Successfully created image [%s]." % outfilePath

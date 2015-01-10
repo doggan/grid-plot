@@ -1,5 +1,4 @@
 {
-	"outFileName":"testData.png",
 	"grid":{
 		"backgroundImage":"",
 		"cellSizeInPixels":[64,64],

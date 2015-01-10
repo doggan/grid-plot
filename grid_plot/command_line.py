@@ -4,16 +4,18 @@ import grid_plot
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("infile", help="the input data file")
+    parser.add_argument("infile", help = "the input data file")
+    parser.add_argument("outfile", help = "the output file")
     args = parser.parse_args()
 
-    inFileName = args.infile
+    infilePath = args.infile
+    outfilePath = args.outfile
 
     startTime = time()
-    print "Processing [%s]..." % inFileName
+    print "Processing [%s]..." % infilePath
 
     # Processing.
-    grid_plot.processFile(inFileName)
+    grid_plot.processFile(infilePath, outfilePath)
 
     endTime = time()
     totalTime = endTime - startTime
