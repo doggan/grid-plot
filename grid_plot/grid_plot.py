@@ -1,5 +1,7 @@
 import math
 import json
+import os
+import errno
 
 # PIL
 from PIL import Image
@@ -221,6 +223,22 @@ def parseFile(filePath):
 
     return rootValue
 
+def mkdir_p(path):
+    path = os.path.dirname(path)
+
+    # Path is within a directory.
+    if not path:
+        return
+
+    # Attempt to create the directory.
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
 def processFile(infilePath, outfilePath):
     # Process input file.
     rootValue = parseFile(infilePath)
@@ -260,6 +278,12 @@ def processFile(infilePath, outfilePath):
     drawGridCoordinates(draw, imageDesc)
 
     # Save image.
-    img.save(outfilePath, "PNG")
-
-    print "Successfully created image [%s]." % outfilePath
+    # Attempt directory structure creation if necessary.
+    try:
+        mkdir_p(outfilePath)
+        img.save(outfilePath, "PNG")
+        print "Successfully created image [%s]." % outfilePath
+    except IOError as e:
+        print e
+        print "Unable to create image [%s]." % outfilePath
+        print "Please verify outfile path."
