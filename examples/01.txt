@@ -1,5 +1,7 @@
 {
 	"grid":{
+		"majorLineInterval":5,
+		"majorLineWidth":3,
 		"backgroundImage":"",
 		"cellSizeInPixels":[64,64],
 		"coordinates":[

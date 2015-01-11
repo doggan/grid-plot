@@ -8,8 +8,10 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-g_gridThickLineInterval = 5   # Every "thickLineInterval" number of lines will be drawn darker.
-g_gridThickLineWidth = 3
+class Settings:
+    def __init__(self):
+        self.gridMajorLineInterval = 5  # The spacing between drawing major lines
+        self.gridMajorLineWidth = 3     # The thickness of all major lines
 
 """
 Struct-like object for grouping together data
@@ -62,7 +64,7 @@ def processLayer(baseImg, imageDesc, layerValue):
     mask = Image.merge("L", (a,))        # Retrieve the alpha band of the top image to use as a mask.
     baseImg.paste(img2, (0,0), mask)    # Paste top layer into base layer using mask for interpolation.
 
-def drawGrid(draw, imageDesc):
+def drawGrid(settings, draw, imageDesc):
     cellSizeInPixels = imageDesc.cellSizeInPixels
     gridSize = imageDesc.gridSize
     gridSizeInPixels = imageDesc.gridSizeInPixels
@@ -74,8 +76,8 @@ def drawGrid(draw, imageDesc):
         toPos = (fromPos[0], fromPos[1] + gridSizeInPixels[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = g_gridThickLineWidth\
-            if (x % g_gridThickLineInterval == 0)\
+        width = settings.gridMajorLineWidth\
+            if (x % settings.gridMajorLineInterval == 0)\
             or x == gridSize[0]\
             else 1
 
@@ -87,8 +89,8 @@ def drawGrid(draw, imageDesc):
         toPos = (fromPos[0] + gridSizeInPixels[0], fromPos[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = g_gridThickLineWidth\
-            if (y % g_gridThickLineInterval == 0)\
+        width = settings.gridMajorLineWidth\
+            if (y % settings.gridMajorLineInterval == 0)\
             or y == gridSize[1]\
             else 1
 
@@ -128,7 +130,7 @@ def getFont(imageDesc):
 
     return None
 
-def drawGridCoordinates(draw, imageDesc):
+def drawGridCoordinates(settings, draw, imageDesc):
     # Get font for rendering grid coordinates.
     font = getFont(imageDesc)
     if not font:
@@ -140,7 +142,7 @@ def drawGridCoordinates(draw, imageDesc):
     gridOrigin = imageDesc.gridOrigin
 
     # Prevents text from running into thick border along edges of grid.
-    padding = math.ceil(g_gridThickLineWidth / 2.0 + 1)
+    padding = math.ceil(settings.gridMajorLineWidth / 2.0 + 1)
 
     # Top/Bottom
     posBotY = gridSizeInPixels[1] + cellSizeInPixels[1] + padding
@@ -256,6 +258,13 @@ def processFile(infilePath, outfilePath):
 
     gridValue = rootValue["grid"]
 
+    # Settings.
+    settings = Settings()
+    if "majorLineInterval" in gridValue:
+        settings.gridMajorLineInterval = gridValue["majorLineInterval"]
+    if "majorLineWidth" in gridValue:
+        settings.gridMajorLineWidth = gridValue["majorLineWidth"]
+
     # Set up background image if specified.
     backgroundImageFileName = gridValue.get("backgroundImage")
     if backgroundImageFileName:
@@ -274,8 +283,8 @@ def processFile(infilePath, outfilePath):
         processLayer(img, imageDesc, layerValue)
 
     # Draw the grid overlay.
-    drawGrid(draw, imageDesc)
-    drawGridCoordinates(draw, imageDesc)
+    drawGrid(settings, draw, imageDesc)
+    drawGridCoordinates(settings, draw, imageDesc)
 
     # Save image.
     # Attempt directory structure creation if necessary.
