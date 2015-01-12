@@ -1,0 +1,40 @@
+{
+	"_comment": "The size of a single cell in pixels.",
+	"cellSizeInPixels":[64,64],
+
+	"_comment": "The start [x, y] and end [x, y] coordinates of the grid.",
+	"coordinates":[
+		[0,0],
+		[4,4]
+	],
+
+	"_comment": "Layers contain the actual cell data to be plotted on the grid. Multiple layers can exist, and are specified from low priority to high priority. High priority layers will be rendered on top of lower priority layers.",
+	"layers":[
+		{
+			"_comment": "The color of the layer specified as an [R,G,B,A] value.",
+			"color":[255,0,0,255],
+
+			"_comment": "The cell data (points) to be plotted on the grid for this layer.",
+			"cells":[
+				[0,0],[1,0],[2,0],
+				[1,1],[2,1],
+				[2,2]
+			]
+		},
+		{
+			"color":[0,0,255,255],
+			"cells":[
+				[2,2]
+			]
+		}
+	],
+
+	"_comment": "(Optional) The interval at which major lines will be drawn.",
+	"majorLineInterval":5,
+
+	"_comment": "(Optional) The thickness of drawn major lines.",
+	"majorLineThickness":3,
+
+	"_comment": "(Optional) Supply an image to be used as the background for the output grid. Must be a valid image path.",
+	"backgroundImage":"./examples/00_background.png"
+}
