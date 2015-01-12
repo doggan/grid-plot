@@ -173,19 +173,19 @@ def drawGridCoordinates(draw, imageDesc):
         draw.text(pos, str(coordStr), font = font, fill = "black")
 
 # Parse settings and create description struct used for image creation.
-def createImageDesc(gridValue):
+def createImageDesc(rootValue):
     # The spacing between drawing major lines
     gridMajorLineInterval = 5
-    if "majorLineInterval" in gridValue:
-        gridMajorLineInterval = gridValue["majorLineInterval"]
+    if "majorLineInterval" in rootValue:
+        gridMajorLineInterval = rootValue["majorLineInterval"]
     # The thickness of all major lines
     gridMajorLineWidth = 3
-    if "majorLineWidth" in gridValue:
-        gridMajorLineWidth = gridValue["majorLineWidth"]
+    if "majorLineWidth" in rootValue:
+        gridMajorLineWidth = rootValue["majorLineWidth"]
 
-    cellSizeInPixels = tuple(gridValue["cellSizeInPixels"])
+    cellSizeInPixels = tuple(rootValue["cellSizeInPixels"])
 
-    coordValue = gridValue["coordinates"]
+    coordValue = rootValue["coordinates"]
     startCoords = coordValue[0]
     endCoords = coordValue[1]
     colCount = endCoords[0] - startCoords[0] + 1
@@ -254,13 +254,8 @@ def generateGrid(infilePath, outfilePath):
     if not rootValue:
         return
 
-    if "grid" not in rootValue:
-        print "Invalid input file format."
-        return
-    gridValue = rootValue["grid"]
-
     # Group all necessary params into single object for easy access.
-    imageDesc = createImageDesc(gridValue)
+    imageDesc = createImageDesc(rootValue)
     if not imageDesc:
         return
 
@@ -269,7 +264,7 @@ def generateGrid(infilePath, outfilePath):
     draw = ImageDraw.Draw(img)
 
     # Set up background image if specified.
-    backgroundImageFileName = gridValue.get("backgroundImage")
+    backgroundImageFileName = rootValue.get("backgroundImage")
     if backgroundImageFileName:
         try:
             bgImg = Image.open(backgroundImageFileName, "r")
@@ -281,7 +276,7 @@ def generateGrid(infilePath, outfilePath):
             print "Unable to open backgroundImage [%s]." % backgroundImageFileName
 
     # Process each layer from bottom to top.
-    layersValue = gridValue["layers"]
+    layersValue = rootValue["layers"]
     for layerValue in layersValue:
         processLayer(img, imageDesc, layerValue)
 

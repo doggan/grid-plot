@@ -15,7 +15,7 @@ def main():
     print "Processing [%s]..." % infilePath
 
     # Processing.
-    grid_plot.processFile(infilePath, outfilePath)
+    grid_plot.generateGrid(infilePath, outfilePath)
 
     endTime = time()
     totalTime = endTime - startTime
