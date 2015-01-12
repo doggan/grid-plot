@@ -72,7 +72,7 @@ def drawGrid(draw, gridDesc):
         toPos = (fromPos[0], fromPos[1] + gridSizeInPixels[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = gridDesc.gridMajorLineWidth\
+        width = gridDesc.gridMajorLineThickness\
             if (x % gridDesc.gridMajorLineInterval == 0)\
             or x == gridSize[0]\
             else 1
@@ -85,7 +85,7 @@ def drawGrid(draw, gridDesc):
         toPos = (fromPos[0] + gridSizeInPixels[0], fromPos[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = gridDesc.gridMajorLineWidth\
+        width = gridDesc.gridMajorLineThickness\
             if (y % gridDesc.gridMajorLineInterval == 0)\
             or y == gridSize[1]\
             else 1
@@ -138,7 +138,7 @@ def drawGridCoordinates(draw, gridDesc):
     gridOrigin = gridDesc.gridOrigin
 
     # Prevents text from running into thick border along edges of grid.
-    padding = math.ceil(gridDesc.gridMajorLineWidth / 2.0 + 1)
+    padding = math.ceil(gridDesc.gridMajorLineThickness / 2.0 + 1)
 
     # Top/Bottom
     posBotY = gridSizeInPixels[1] + cellSizeInPixels[1] + padding
@@ -174,14 +174,14 @@ def drawGridCoordinates(draw, gridDesc):
 
 # Parse settings and create description struct used for grid creation.
 def createGridDesc(rootValue):
-    # The spacing between drawing major lines
+    # The interval at which major lines will be drawn.
     gridMajorLineInterval = 5
     if "majorLineInterval" in rootValue:
         gridMajorLineInterval = rootValue["majorLineInterval"]
     # The thickness of all major lines
-    gridMajorLineWidth = 3
-    if "majorLineWidth" in rootValue:
-        gridMajorLineWidth = rootValue["majorLineWidth"]
+    gridMajorLineThickness = 3
+    if "majorLineThickness" in rootValue:
+        gridMajorLineThickness = rootValue["majorLineThickness"]
 
     cellSizeInPixels = tuple(rootValue["cellSizeInPixels"])
 
@@ -205,7 +205,7 @@ def createGridDesc(rootValue):
 
     return Bunch(\
         gridMajorLineInterval = gridMajorLineInterval,\
-        gridMajorLineWidth = gridMajorLineWidth,\
+        gridMajorLineThickness = gridMajorLineThickness,\
         cellSizeInPixels = cellSizeInPixels,\
         gridOrigin = startCoords,\
         gridOriginInPixels = cellSizeInPixels,\

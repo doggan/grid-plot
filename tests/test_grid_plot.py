@@ -20,7 +20,7 @@ class TestSettingsFile(unittest.TestCase):
         gridDesc = grid_plot.createGridDesc(rootValue)
 
         self.assertIn("gridMajorLineInterval", gridDesc)
-        self.assertIn("gridMajorLineWidth", gridDesc)
+        self.assertIn("gridMajorLineThickness", gridDesc)
         self.assertIn("cellSizeInPixels", gridDesc)
         self.assertIn("gridOrigin", gridDesc)
         self.assertIn("gridOriginInPixels", gridDesc)
