@@ -17,9 +17,10 @@ class Settings:
 Struct-like object for grouping together data
 Reference: http://code.activestate.com/recipes/52308/
 """
-class Bunch:
+class Bunch(dict):
     def __init__(self, **kwds):
-        self.__dict__.update(kwds)
+        dict.__init__(self, kwds)
+        self.__dict__ = self
 
 def processLayer(baseImg, imageDesc, layerValue):
     color = layerValue["color"]
