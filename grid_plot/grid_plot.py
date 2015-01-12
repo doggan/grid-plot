@@ -17,7 +17,7 @@ class Bunch(dict):
         dict.__init__(self, kwds)
         self.__dict__ = self
 
-def processLayer(baseImg, imageDesc, layerValue):
+def processLayer(baseImg, gridDesc, layerValue):
     color = layerValue["color"]
     if not isinstance(color, list):
         print "Invalid color \"%s\". Color must be of the form [R,G,B,A]. Example: [255,0,0,255]. Skipping this layer." % str(color)
@@ -26,13 +26,13 @@ def processLayer(baseImg, imageDesc, layerValue):
     color = tuple(color)
     cells = layerValue["cells"]
 
-    gridOrigin = imageDesc.gridOrigin
-    gridOriginInPixels = imageDesc.gridOriginInPixels
-    gridSize = imageDesc.gridSize
-    cellSizeInPixels = imageDesc.cellSizeInPixels
+    gridOrigin = gridDesc.gridOrigin
+    gridOriginInPixels = gridDesc.gridOriginInPixels
+    gridSize = gridDesc.gridSize
+    cellSizeInPixels = gridDesc.cellSizeInPixels
 
     # Create new image for drawing this layer.
-    img2 = Image.new("RGBA", imageDesc.imageSizeInPixels)
+    img2 = Image.new("RGBA", gridDesc.imageSizeInPixels)
     draw2 = ImageDraw.Draw(img2)
 
     # Draw all cells in this layer.
@@ -60,11 +60,11 @@ def processLayer(baseImg, imageDesc, layerValue):
     mask = Image.merge("L", (a,))        # Retrieve the alpha band of the top image to use as a mask.
     baseImg.paste(img2, (0,0), mask)    # Paste top layer into base layer using mask for interpolation.
 
-def drawGrid(draw, imageDesc):
-    cellSizeInPixels = imageDesc.cellSizeInPixels
-    gridSize = imageDesc.gridSize
-    gridSizeInPixels = imageDesc.gridSizeInPixels
-    gridOriginInPixels = imageDesc.gridOriginInPixels
+def drawGrid(draw, gridDesc):
+    cellSizeInPixels = gridDesc.cellSizeInPixels
+    gridSize = gridDesc.gridSize
+    gridSizeInPixels = gridDesc.gridSizeInPixels
+    gridOriginInPixels = gridDesc.gridOriginInPixels
 
     # Vertical lines.
     for x in range(gridSize[0] + 1):
@@ -72,8 +72,8 @@ def drawGrid(draw, imageDesc):
         toPos = (fromPos[0], fromPos[1] + gridSizeInPixels[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = imageDesc.gridMajorLineWidth\
-            if (x % imageDesc.gridMajorLineInterval == 0)\
+        width = gridDesc.gridMajorLineWidth\
+            if (x % gridDesc.gridMajorLineInterval == 0)\
             or x == gridSize[0]\
             else 1
 
@@ -85,16 +85,16 @@ def drawGrid(draw, imageDesc):
         toPos = (fromPos[0] + gridSizeInPixels[0], fromPos[1])
 
         # Line width calculation ("major" lines and first/last line of the grid).
-        width = imageDesc.gridMajorLineWidth\
-            if (y % imageDesc.gridMajorLineInterval == 0)\
+        width = gridDesc.gridMajorLineWidth\
+            if (y % gridDesc.gridMajorLineInterval == 0)\
             or y == gridSize[1]\
             else 1
 
         draw.line(fromPos + toPos, fill="black", width=width)
 
 # Finds the biggest size font that will fit inside a single cell.
-def getFont(imageDesc):
-    cellSizeInPixels = imageDesc.cellSizeInPixels
+def getFont(gridDesc):
+    cellSizeInPixels = gridDesc.cellSizeInPixels
     currentFontSize = 4
 
     font = None
@@ -126,19 +126,19 @@ def getFont(imageDesc):
 
     return None
 
-def drawGridCoordinates(draw, imageDesc):
+def drawGridCoordinates(draw, gridDesc):
     # Get font for rendering grid coordinates.
-    font = getFont(imageDesc)
+    font = getFont(gridDesc)
     if not font:
         return
 
-    cellSizeInPixels = imageDesc.cellSizeInPixels
-    gridSize = imageDesc.gridSize
-    gridSizeInPixels = imageDesc.gridSizeInPixels
-    gridOrigin = imageDesc.gridOrigin
+    cellSizeInPixels = gridDesc.cellSizeInPixels
+    gridSize = gridDesc.gridSize
+    gridSizeInPixels = gridDesc.gridSizeInPixels
+    gridOrigin = gridDesc.gridOrigin
 
     # Prevents text from running into thick border along edges of grid.
-    padding = math.ceil(imageDesc.gridMajorLineWidth / 2.0 + 1)
+    padding = math.ceil(gridDesc.gridMajorLineWidth / 2.0 + 1)
 
     # Top/Bottom
     posBotY = gridSizeInPixels[1] + cellSizeInPixels[1] + padding
@@ -172,8 +172,8 @@ def drawGridCoordinates(draw, imageDesc):
         pos = (posRightX, pos[1])
         draw.text(pos, str(coordStr), font = font, fill = "black")
 
-# Parse settings and create description struct used for image creation.
-def createImageDesc(rootValue):
+# Parse settings and create description struct used for grid creation.
+def createGridDesc(rootValue):
     # The spacing between drawing major lines
     gridMajorLineInterval = 5
     if "majorLineInterval" in rootValue:
@@ -192,8 +192,7 @@ def createImageDesc(rootValue):
     rowCount = endCoords[1] - startCoords[1] + 1
 
     if colCount <= 0 or rowCount <= 0:
-        print "Invalid grid size: [%sx%s]. Check coordinates." % (colCount, rowCount)
-        return None
+        raise ValueError("Invalid grid size: [%sx%s]. Check coordinates." % (colCount, rowCount))
 
     # Calculate the grid size (add 1 for border at far edges).
     gridSizeInPixels =\
@@ -254,13 +253,18 @@ def generateGrid(infilePath, outfilePath):
     if not rootValue:
         return
 
-    # Group all necessary params into single object for easy access.
-    imageDesc = createImageDesc(rootValue)
-    if not imageDesc:
+    # Parse grid description settings.
+    try:
+        gridDesc = createGridDesc(rootValue)
+    except KeyError as e:
+        print "Unable to parse input data file. Key [%s] does not exist." % e
+        return
+    except ValueError as e:
+        print e
         return
 
     # Image creation.
-    img = Image.new("RGBA", imageDesc.imageSizeInPixels, color="white")
+    img = Image.new("RGBA", gridDesc.imageSizeInPixels, color="white")
     draw = ImageDraw.Draw(img)
 
     # Set up background image if specified.
@@ -269,20 +273,20 @@ def generateGrid(infilePath, outfilePath):
         try:
             bgImg = Image.open(backgroundImageFileName, "r")
             # Resize to fit within grid boundaries.
-            bgImg = bgImg.resize(imageDesc.gridSizeInPixels)
+            bgImg = bgImg.resize(gridDesc.gridSizeInPixels)
             # Paste into base image.
-            img.paste(bgImg, imageDesc.gridOriginInPixels)
+            img.paste(bgImg, gridDesc.gridOriginInPixels)
         except IOError:
             print "Unable to open backgroundImage [%s]." % backgroundImageFileName
 
     # Process each layer from bottom to top.
     layersValue = rootValue["layers"]
     for layerValue in layersValue:
-        processLayer(img, imageDesc, layerValue)
+        processLayer(img, gridDesc, layerValue)
 
     # Draw the grid overlay.
-    drawGrid(draw, imageDesc)
-    drawGridCoordinates(draw, imageDesc)
+    drawGrid(draw, gridDesc)
+    drawGridCoordinates(draw, gridDesc)
 
     # Save image.
     # Attempt directory structure creation if necessary.
